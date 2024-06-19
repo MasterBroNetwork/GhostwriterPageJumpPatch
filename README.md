@@ -1,6 +1,7 @@
-# Ghostwriter
+# GhostwriterPageJumpPatch
 
 Adds extra features to Minecraft book interfaces (loading, saving, formatting buttons, etc.)
+Patched to add a button that jumps forward in the book by 5 pages.
 
 ## Installation:
 
