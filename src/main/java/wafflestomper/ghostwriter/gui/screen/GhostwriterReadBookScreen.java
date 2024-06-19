@@ -3,6 +3,7 @@ package wafflestomper.ghostwriter.gui.screen;
 import net.minecraft.client.gui.screens.inventory.BookViewScreen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.world.item.ItemStack;
+import wafflestomper.ghostwriter.Ghostwriter;
 import wafflestomper.ghostwriter.utilities.BookUtilities;
 import wafflestomper.ghostwriter.gui.GhostLayer;
 import wafflestomper.ghostwriter.gui.IGhostBook;
@@ -19,6 +20,13 @@ public class GhostwriterReadBookScreen extends BookViewScreen implements IGhostB
 		super(bookInfoIn);
 		this.ghostLayer = new GhostLayer(this, this, false);
 		this.ghostLayer.extractTitleAuthor(currStack);
+	}
+
+	public GhostwriterReadBookScreen(BookViewScreen.BookAccess bookInfoIn, ItemStack currStack, int currPage) {
+		super(bookInfoIn);
+		this.ghostLayer = new GhostLayer(this, this, false);
+		this.ghostLayer.extractTitleAuthor(currStack);
+		setCurrPage(currPage);
 	}
 	
 	
@@ -69,16 +77,29 @@ public class GhostwriterReadBookScreen extends BookViewScreen implements IGhostB
 		// getPage() either returns the page text or a blank Component
 		return this.bookAccess.getPage(pageNum).toString();
 	}
-	
-	
+
+
 	@Override  // From IGhostBook
 	public int getCurrPage() {
 		return this.currentPage;
 	}
-	
-	// Unused methods that only apply to unsigned books
+
+
 	@Override  // From IGhostBook
 	public void setCurrPage(int pageNum) {
+		// Idiot proofing
+		if (pageNum < 0) {
+			Ghostwriter.LOG.error("Couldn't move to page " + pageNum + ". It doesn't exist");
+			pageNum = 0;
+		}
+
+		if (pageNum > this.getNumPages() - 1) {
+			pageNum = this.getNumPages() - 1;
+			Ghostwriter.LOG.warn("Attempted to go further than max page, Jumped to maximum page in book.");
+		}
+
+		this.currentPage = pageNum;
+		this.bookChanged(false);
 	}
 	
 	@Override  // From IGhostBook

@@ -48,6 +48,25 @@ public class GhostwriterEditBookScreen extends BookEditScreen implements IGhostB
 				this::setClipboard,  // setClipboard
 				(p_238771_0_) -> p_238771_0_.length() <= SharedConstants.BOOK_TITLE_MAX_LEN);
 	}
+
+	public GhostwriterEditBookScreen(Player editingPlayer, ItemStack book, InteractionHand hand, int currPage) {
+		super(editingPlayer, book, hand);
+		this.ghostLayer = new GhostLayer(this, this, true);
+
+		// Swap out the title input util for one that allows longer titles and updates the title in GhostLayer
+		// WrittenBookItem.validBookTagContents declares the book invalid if the title is over 32 characters
+		titleEdit = new TextFieldHelper(
+				() -> this.title,
+				(p_238772_1_) -> {
+					this.title = p_238772_1_;
+					this.ghostLayer.setBookTitle(this.title);
+				},
+				this::getClipboard,  // getClipboard
+				this::setClipboard,  // setClipboard
+				(p_238771_0_) -> p_238771_0_.length() <= SharedConstants.BOOK_TITLE_MAX_LEN);
+
+		setCurrPage(currPage);
+	}
 	
 	
 	@Override  // From BookEditScreen
@@ -323,16 +342,21 @@ public class GhostwriterEditBookScreen extends BookEditScreen implements IGhostB
 	public int getCurrPage() {
 		return this.currentPage;
 	}
-	
-	
+
+
 	@Override  // From IGhostBook
 	public void setCurrPage(int pageNum) {
 		// Idiot proofing
-		if (pageNum < 0 || pageNum > this.pages.size() - 1){
+		if (pageNum < 0) {
 			Ghostwriter.LOG.error("Couldn't move to page " + pageNum + ". It doesn't exist");
 			pageNum = 0;
 		}
-		
+
+		if (pageNum > this.getNumPages() - 1) {
+			pageNum = this.getNumPages() - 1;
+			Ghostwriter.LOG.warn("Attempted to go further than max page, Jumped to maximum page in book.");
+		}
+
 		this.currentPage = pageNum;
 		this.bookChanged(false);
 	}

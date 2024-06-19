@@ -3,12 +3,16 @@ package wafflestomper.ghostwriter.gui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.inventory.BookViewScreen;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Items;
 import wafflestomper.ghostwriter.Ghostwriter;
 import wafflestomper.ghostwriter.gui.screen.GhostwriterEditBookScreen;
 import wafflestomper.ghostwriter.gui.screen.GhostwriterFileBrowserScreen;
+import wafflestomper.ghostwriter.gui.screen.GhostwriterReadBookScreen;
 import wafflestomper.ghostwriter.gui.screen.GhostwriterSignedPreviewScreen;
 import wafflestomper.ghostwriter.utilities.Clipboard;
 import wafflestomper.ghostwriter.utilities.FileHandler;
@@ -439,6 +443,18 @@ public class GhostLayer {
 				(pressed_button) -> this.disableAutoReload(),true);
 		
 		this.addPageButton(5, 70, "Add Signature Pages", (pressed_button) -> this.addSignaturePages(), true);
+
+		this.addPageButton(5, 170, "Jump 5 Pages", (pressed_button) -> {
+			// WHY DID THIS WORK?! WHY DID THIS FIX THE CRASHING????
+			if(MINECRAFT.player.getMainHandItem().getItem() == Items.WRITTEN_BOOK) {
+				assert MINECRAFT.player != null;
+				MINECRAFT.setScreen(new GhostwriterReadBookScreen(new BookViewScreen.WrittenBookAccess(MINECRAFT.player.getMainHandItem()), MINECRAFT.player.getMainHandItem(), this.parent.getCurrPage() + 5));
+			} else {
+				assert MINECRAFT.player != null;
+				MINECRAFT.setScreen(new GhostwriterReadBookScreen(new BookViewScreen.WritableBookAccess(MINECRAFT.player.getMainHandItem()), MINECRAFT.player.getMainHandItem(), this.parent.getCurrPage() + 5));
+				MINECRAFT.setScreen(new GhostwriterEditBookScreen(MINECRAFT.player, MINECRAFT.player.getMainHandItem(), InteractionHand.MAIN_HAND, this.parent.getCurrPage() + 5));
+			}
+		}, false);
 		
 		this.addPageButton(5, 95, "Preview Signed Book", (pressed_button) -> MINECRAFT.setScreen(
 				new GhostwriterSignedPreviewScreen((GhostwriterEditBookScreen) this.screen)), true);
